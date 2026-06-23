@@ -1,5 +1,6 @@
-import { BskyAgent, RichText } from "@atproto/api";
+import { AppBskyRichtextFacet, BskyAgent, RichText } from "@atproto/api";
 import Papa from "papaparse";
+import * as cheerio from "cheerio";
 
 async function main() {
   const identifier = process.env.BLUESKY_IDENTIFIER;
@@ -28,7 +29,6 @@ async function main() {
 
   //파싱처리
   const sheetData = Papa.parse(csv, { header: false });
-  // console.log(sheetData);
   const dataArray = sheetData.data as string[][];
 
   if (dataArray.length > 0) {
@@ -47,7 +47,7 @@ async function main() {
     console.log("입력 데이터가 없습니다.");
   }
 
-  //게시
+  //날짜에 대응하는 내용 게시하기
   async function post(postText: string, replyText?: string) {
     const text =
       postText +
@@ -70,6 +70,16 @@ async function main() {
       const richText2 = new RichText({ text: secText });
       await richText2.detectFacets(agent);
 
+      // 임베드할 HTML 데이터 파싱 -> 글 내 최초 링크 기준
+      const firstLink = extractFirstLink(richText2);
+      console.log("=> link:", firstLink);
+
+      //링크 프리뷰 생성
+      const linkEmbedData = firstLink
+        ? await getLinkEmbedData(firstLink)
+        : undefined;
+      console.log("==> embed data:", linkEmbedData);
+
       //스레드로 연결되는 추가 게시글 게시
       const replyRes = await agent.post({
         text: richText2.text,
@@ -78,6 +88,7 @@ async function main() {
           parent: { uri: res.uri, cid: res.cid },
         },
         facets: richText2.facets,
+        ...(linkEmbedData && { embed: linkEmbedData }),
         createdAt: new Date().toISOString(),
       });
 
@@ -88,6 +99,55 @@ async function main() {
         replyRes.cid,
       );
     }
+  }
+
+  // facets에서 첫 번째 링크 URL 추출
+  function extractFirstLink(rt: RichText): string | undefined {
+    if (!rt.facets) return undefined;
+
+    for (const facet of rt.facets) {
+      for (const feature of facet.features) {
+        if (AppBskyRichtextFacet.isLink(feature)) {
+          return feature.uri;
+        }
+      }
+    }
+    return undefined;
+  }
+
+  //html 파싱처리 > embed 데이터 리턴
+  async function getLinkEmbedData(url: string) {
+    const urlRes = await fetch(url);
+    const html = await urlRes.text();
+    const $ = cheerio.load(html);
+
+    const title =
+      $('meta[property="og:title"]').attr("content") ?? $("title").text();
+    const desc = $('meta[property="og:description"]').attr("content") ?? "";
+    const imageUrl = $('meta[property="og:image"]').attr("content");
+
+    //og 이미지 업로드 후 blob 가져오기
+    let thumb;
+    if (imageUrl) {
+      const imgRes = await fetch(imageUrl);
+      const imgBuffer = await imgRes.arrayBuffer();
+      const imgBytes = new Uint8Array(imgBuffer);
+
+      const uploaded = await agent.uploadBlob(imgBytes, {
+        encoding: imgRes.headers.get("content-type") ?? "image/jpeg",
+      });
+      thumb = uploaded.data.blob;
+    }
+
+    return {
+      $type: "app.bsky.embed.external",
+      external: {
+        uri: url,
+        title: title,
+        description: desc,
+        thumb: thumb ?? undefined,
+      },
+    };
   }
 }
 
