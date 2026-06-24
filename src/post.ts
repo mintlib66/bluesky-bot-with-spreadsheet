@@ -26,7 +26,10 @@ async function main() {
     `format=csv&gid=${gid}`;
 
   console.log("fetch start...");
-  const csv = await fetch(url).then((r) => r.text());
+  const res = await fetch(url);
+  console.log("res:", res);
+
+  const csv = await res.text();
   console.log("fetch end...");
 
   //파싱처리
