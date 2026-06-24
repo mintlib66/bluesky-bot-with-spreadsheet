@@ -25,7 +25,9 @@ async function main() {
     `https://docs.google.com/spreadsheets/d/${sheetId}/export?` +
     `format=csv&gid=${gid}`;
 
+  console.log("fetch start...");
   const csv = await fetch(url).then((r) => r.text());
+  console.log("fetch end...");
 
   //파싱처리
   const sheetData = Papa.parse(csv, { header: false });
