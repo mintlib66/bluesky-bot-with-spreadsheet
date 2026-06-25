@@ -1,9 +1,9 @@
 name: Post to Bluesky
 
 on:
-  schedule:
-    #- cron: "0 11 * * 6" # 매주 토요일 11:00 UTC (= 20:00 KST)에 자동 실행
-    - cron: "30 3 * * 3" # 자동 실행 테스트용
+  #schedule:
+  #- cron: "0 20 * * 6" # 매주 토요일 20:00 KST 에 자동 실행 => 트리거를 cron-job으로 교체
+  #  timezone: 'Asia/Seoul'
   workflow_dispatch: # "Run workflow" 버튼으로 수동 실행 가능
 
 jobs:
