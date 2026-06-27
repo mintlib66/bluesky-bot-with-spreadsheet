@@ -43,7 +43,7 @@ async function main() {
       if (date == today) {
         console.log("======================================");
         console.log(date, today);
-        console.log(row);
+        // console.log(row);
         console.log("======================================");
         post(row[1], row[2]);
       }
@@ -54,10 +54,32 @@ async function main() {
 
   //날짜에 대응하는 내용 게시하기
   async function post(postText: string, replyText?: string) {
-    const text =
-      postText +
-      `\n\n작동 테스트 실행:${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}`;
-    const richText = new RichText({ text: text });
+    // 게시글 글자수 제한(300자) 초과 시 연결되는 스레드에 같이 붙여서 넘어간다
+    let firstText = postText;
+    let overText = "";
+
+    if (postText.length > 300) {
+      //엔터 단위로 컷 => 엔터 없으면 글자수 300자에서 자른다.
+      const lines = postText.split("\n");
+      let cut = "";
+
+      for (const line of lines) {
+        // 이 줄을 추가했을 때 300자 초과 여부 확인 (\n 포함)
+        const next = cut.length === 0 ? line : cut + "\n" + line;
+        if (next.length > 300) break;
+        cut = next;
+      }
+
+      if (cut.length === 0) {
+        // 엔터가 없거나 첫 줄 자체가 300자 초과 → 글자수 기준으로 자름
+        cut = postText.slice(0, 300);
+      }
+
+      firstText = cut;
+      overText = postText.slice(cut.length).trimStart() + "\n\n";
+    }
+
+    const richText = new RichText({ text: firstText });
     await richText.detectFacets(agent);
 
     //첫번째 글 게시
@@ -69,10 +91,8 @@ async function main() {
     console.log("게시 완료-- URI: ", res.uri, " / CID: ", res.cid);
 
     if (replyText) {
-      // const secText =
-      //   replyText +
-      //   `\n\n작동 테스트 실행:${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}`;
-      const richText2 = new RichText({ text: replyText });
+      const secText = overText + replyText;
+      const richText2 = new RichText({ text: secText });
       await richText2.detectFacets(agent);
 
       // 임베드할 HTML 데이터 파싱 -> 글 내 최초 링크 기준
