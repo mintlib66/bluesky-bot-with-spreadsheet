@@ -69,10 +69,10 @@ async function main() {
     console.log("게시 완료-- URI: ", res.uri, " / CID: ", res.cid);
 
     if (replyText) {
-      const secText =
-        replyText +
-        `\n\n작동 테스트 실행:${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}`;
-      const richText2 = new RichText({ text: secText });
+      // const secText =
+      //   replyText +
+      //   `\n\n작동 테스트 실행:${new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })}`;
+      const richText2 = new RichText({ text: replyText });
       await richText2.detectFacets(agent);
 
       // 임베드할 HTML 데이터 파싱 -> 글 내 최초 링크 기준

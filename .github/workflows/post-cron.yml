@@ -1,9 +1,6 @@
 name: Post to Bluesky
 
 on:
-  #schedule:
-  #- cron: "0 20 * * 6" # 매주 토요일 20:00 KST 에 자동 실행 => 트리거를 cron-job으로 교체
-  #  timezone: 'Asia/Seoul'
   workflow_dispatch: # "Run workflow" 버튼으로 수동 실행 가능
 
 jobs:
@@ -24,7 +21,7 @@ jobs:
 
       - name: Run bot
         run: npx tsx src/post.ts
-        env: #계정 인증 정보는 secrets 이용
+        env: #계정 인증 정보는 secrets 이용, 시트ID, GID는 secret으로 처리하지 않아도 무방
           BLUESKY_IDENTIFIER: ${{ secrets.BLUESKY_IDENTIFIER }}
           BLUESKY_APP_PASSWORD: ${{ secrets.BLUESKY_APP_PASSWORD }}
           SHEET_ID: ${{ secrets.SHEET_ID }}
