@@ -43,7 +43,6 @@ async function main() {
       if (date == today) {
         console.log("======================================");
         console.log(date, today);
-        // console.log(row);
         console.log("======================================");
         post(row[1], row[2]);
       }

@@ -1,11 +1,9 @@
-## Bluesky Bot : Google Spreadsheet data upload
+# Bluesky Bot with Spreadsheet : data auto post
 
 매주 정해진 시각에 Bluesky에 글을 게시하는 자동봇입니다.  
 대상 구글 스프레드 시트에서 해당하는 날짜에 대응하는 셀의 데이터를 읽어옵니다.
 
----
-
-### 기능
+## 기능
 
 - 지정 시각에 자동 게시 (cron-job.org → GitHub Actions 연동)
 - 구글 스프레드시트에서 게시 내용 불러오기 (공개 시트, 인증 불필요)
@@ -15,17 +13,13 @@
   - URL이 있는 경우 첫 번째 링크의 OG 태그를 읽어 링크 프리뷰 카드 자동 생성
 - GitHub Actions의 수동 실행 버튼으로 실행 테스트 가능
 
----
-
-### 기술 스택
+## 기술 스택
 
 - **런타임**: Node.js 24
 - **언어**: TypeScript (tsx로 직접 실행, 빌드 단계 없음)
 - **Bluesky SDK**: `@atproto/api`
 - **HTML 파싱**: `cheerio` (OG 태그 추출)
 - **스케줄 실행**: cron-job.org → `GitHub Actions workflow_dispatch`
-
----
 
 ## 프로젝트 구조
 
@@ -42,8 +36,6 @@
 ├── tsconfig.json
 └── README.md
 ```
-
----
 
 ## 동작 흐름
 
@@ -180,14 +172,12 @@ cron-job.org에서 테스트 실행 후 `204 No Content` 응답이 오면 정상
 
 ## 환경변수 목록
 
-| 변수명                 | 설명                    | 필수 |
-| ---------------------- | ----------------------- | ---- |
-| `BLUESKY_IDENTIFIER`   | Bluesky 핸들 (`@` 제외) | ✅   |
-| `BLUESKY_APP_PASSWORD` | Bluesky 앱 비밀번호     | ✅   |
-| `SHEET_ID`             | 구글 스프레드시트 ID    | ✅   |
-| `SHEET_GID`            | 시트 탭 GID             | ✅   |
-
----
+| 변수명                 | 설명                    |
+| ---------------------- | ----------------------- |
+| `BLUESKY_IDENTIFIER`   | Bluesky 핸들 (`@` 제외) |
+| `BLUESKY_APP_PASSWORD` | Bluesky 앱 비밀번호     |
+| `SHEET_ID`             | 구글 스프레드시트 ID    |
+| `SHEET_GID`            | 시트 탭 GID             |
 
 ## 주의사항
 
