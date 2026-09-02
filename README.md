@@ -189,3 +189,31 @@ cron-job.org에서 테스트 실행 후 `204 No Content` 응답이 오면 정상
 - **300자 초과 본문**은 엔터 단위로 잘려 스레드에 이어 게시됩니다. 엔터가 없으면 300자에서 강제 절단됩니다.
 - **workflow의 `schedule` cron**과 cron-job.org를 동시에 사용하면 같은 날 두 번 실행될 수 있습니다. 둘 중 하나만 사용하세요.
 - **`ref` 브랜치명**이 실제 default 브랜치와 다르면 cron-job.org 호출 시 `422` 오류가 발생합니다.
+
+## 토큰 만료 알림
+
+GitHub 액세스 토큰 만료일이 임박하면 Gmail로 알림 메일을 발송합니다.  
+매주 월요일 자동으로 체크하며, 만료 14일 전부터 알림이 발송됩니다.
+
+### 관련 파일 구성
+
+- `src/alarm.ts` — 만료일 체크 및 Gmail SMTP 메일 발송 로직
+- `.github/workflows/check-token-expire.yml` — 매주 실행되는 체크 워크플로우
+
+### 추가 Secrets 등록
+
+| Secret 이름          | 값                                                |
+| -------------------- | ------------------------------------------------- |
+| `TOKEN_EXPIRY_DATE`  | 토큰 만료일 (`YYYY-MM-DD` 형식, 예: `2025-12-31`) |
+| `GMAIL_USER`         | yourname@gmail.com                                |
+| `GMAIL_APP_PASSWORD` | 구글 앱 비밀번호                                  |
+
+> **Gmail 앱 비밀번호 발급 경로**  
+> Google 계정 → 보안 → 2단계 인증 활성화 (필수) → 앱 비밀번호 → 생성
+
+### 토큰 갱신 시 할 일
+
+토큰을 새로 발급할 때마다 아래 두 곳을 업데이트해야 합니다.
+
+1. **cron-job.org** — Advanced → Headers → `Authorization` 값을 새 토큰으로 교체
+2. **GitHub Secrets** — `TOKEN_EXPIRY_DATE`를 새 만료일로 업데이트

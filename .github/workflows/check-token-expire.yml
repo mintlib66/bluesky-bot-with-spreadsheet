@@ -1,0 +1,28 @@
+name: Check GitHub Token Expire
+
+on:
+  schedule:
+    - cron: "0 0 * * *" # 매일 00:00 UTC에 실행 (한국 시간 기준 09:00)
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run bot
+        run: npx tsx src/alarm.ts
+        env: #만료일은 갱신 시 secrets에 업데이트 필요(양식: YYYY-mm-dd)
+          TOKEN_EXPIRY_DATE: ${{ secrets.TOKEN_EXPIRY_DATE }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
